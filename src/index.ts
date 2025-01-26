@@ -17,23 +17,27 @@ const signupWrapper = document.querySelector('.signup-wrapper') as HTMLElement;
 const loginWrapper = document.querySelector('.login-wrapper') as HTMLElement;
 const sendBtn = document.querySelector('.send-data') as HTMLButtonElement;
 const updateBtn = document.querySelector('.update-btn') as HTMLButtonElement;
+const todoTitle = document.querySelector('#todo-title-input') as HTMLInputElement;
+const todoText = document.querySelector('#todo-text-input') as HTMLInputElement;
+const todoDate = document.querySelector('#todo-date-input') as HTMLInputElement;
+const todoList = document.querySelector('.all-posts-list') as HTMLUListElement
 
 // Initialize Supabase client
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-const uniqueId = uuidv4();
-interface MainData  {
-  id: string,
-  title: string,
-  content: string,
-  completed: boolean
+
+interface NewTodo {
+  title: string; 
+  description?: string; 
+  completed?: boolean; 
+  due_date?: string; 
 }
 
-// Example function to fetch data from a table
+
 async function fetchData() {
   const { data: { user  } }= await supabase.auth.getUser();
   if(user){
   const { data, error } = await supabase
-    .from('userdata') // Replace with your actual table name
+    .from('todos') 
     .select('*')
     .eq('user_id', user.id);
 
@@ -41,9 +45,19 @@ async function fetchData() {
     console.error('Error fetching data:', error);
   } else {
     console.log('Data:', data);
-    const appDiv = document.getElementById('app');
-    appDiv!.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+    data?.map((item) => {
+      const li = document.createElement('li') as HTMLLIElement;
+      li.setAttribute('data-parent-id', item.id);
+      li.innerHTML = `
+      <h2 class="post-title">${item.title}</h2>
+      <h2 class="post-text">${item.description22222}</h2>
+      <h2 class="post-date">${item.due_date.toString()}</h2>
+      <button class="del-todo-btn" data-parent-id="${item.id}">Delete</button>
+      `
+      todoList.appendChild(li);
+    })
   }
+  
 }
 }
 
@@ -89,58 +103,70 @@ async function signOutUser() {
   }
 }
 
-async function sendData() {
-  const { data: { user } } = await supabase.auth.getUser();
+async function addTodo(newTodo: NewTodo) {
+  if (!user) {
+    console.log("Användare ej inloggad.");
+    return;
+  }
 
- 
-  if(user){
-    const testObj: MainData = {
-      id: user?.id,
-      title: 'secondPost',
-      content: 'secondText',
-      completed: false
-    }
 
-    const secObj: MainData = {
-      id: user?.id,
-      title: 'thirdPost',
-      content: 'thirdText',
-      completed: false
-    }
-  const { error } = await supabase
-  .from('userdata')
-  .insert([testObj, secObj]);
-  console.log(error);
+  const { data, error } = await supabase
+    .from('todos')
+    .insert({
+     user_id: user.id,
+     ...newTodo
+});
+
+  if (error) {
+    console.error("Fel vid skapande av todo:", error);
+  } else {
+    console.log("Todo skapad:", data);
   }
 }
 
 async function updateData() {
   const { data: { user } } = await supabase.auth.getUser();
   
-  if(user){
-    const testObj: MainData = {
-      id: user?.id,
-      title: 'secondPost',
-      content: 'secondText',
-      completed: false
-    }
-
-    const secObj: MainData = {
-      id: user?.id,
-      title: 'thirdPost',
-      content: 'thirdText',
-      completed: false
-    }
-    const { error } = await supabase
-    .from('userdata')
-    .update([secObj])
-    .eq('id', user.id)
-    console.log(error);
-  }
-
-  
  
 }
+
+todoList.addEventListener('click', async function(event: MouseEvent) {
+  // Kontrollera att event.target är en knapp (HTMLButtonElement)
+  if (event.target && (event.target as HTMLButtonElement).classList.contains('del-todo-btn')) {
+    await deleteTodoByParentId(event);
+  }
+});
+
+async function deleteTodoByParentId(event: Event) {
+  console.log("Hello")
+  if (!user) {
+    console.log('Inget användare är inloggad.');
+    return;
+  }
+
+  // Hämta parentId från data-parent-id attributet på knappen
+  const button = event.target as HTMLButtonElement; // Typa om till HTMLButtonElement
+  const parentId = button.getAttribute('data-parent-id'); // Hämta parentId
+ console.log(parentId)
+  if (!parentId) {
+    console.log('Parent ID saknas.');
+    return;
+  }
+
+  // Ta bort todo-uppgiften från tabellen baserat på parentId
+  const { data, error } = await supabase
+    .from('todos')
+    .delete()
+    .eq('id', parentId) // Filtrera på parent_id
+    .eq('user_id', user.id); // Säkerställ att det är den inloggade användarens todo
+
+  if (error) {
+    console.error('Fel vid borttagning av todo:', error);
+  } else {
+    console.log('Todo borttagen:', data);
+  }
+}
+
 
 const { data: { user } } = await supabase.auth.getUser();
 
@@ -176,7 +202,7 @@ loginBtn.addEventListener('click', () => {
  if(user){
   signupWrapper.style.display = 'none';
   loginWrapper.style.display = 'none';
-  fetchData();
+ 
  }else if(!user){
    signupWrapper.style.display = 'flex';
    loginWrapper.style.display = 'flex';
@@ -195,20 +221,22 @@ logoutBtn.addEventListener('click', () => {
  }
 })
 
+
+
 sendBtn.addEventListener('click', () => {
-sendData();
+  const newTodo: NewTodo = {
+    title: todoTitle.value,
+    description: todoText.value,
+    due_date: todoDate.value
+  };
+addTodo(newTodo);
 })
 
 updateBtn.addEventListener('click', () => {
   updateData();
 })
 
-
-
-// Call the function
-//fetchData();
-//signUpNewUser();
-
+fetchData();
 
 
 

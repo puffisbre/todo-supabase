@@ -1,5 +1,4 @@
 import { createClient } from '@supabase/supabase-js';
-import { v4 as uuidv4 } from 'uuid';
 // Get Supabase URL and Key from environment variables
 const SUPABASE_URL = import.meta.env.VITE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_ANON_KEY;
@@ -13,21 +12,37 @@ const signupBtn = document.querySelector('.signup-btn');
 const signupWrapper = document.querySelector('.signup-wrapper');
 const loginWrapper = document.querySelector('.login-wrapper');
 const sendBtn = document.querySelector('.send-data');
+const updateBtn = document.querySelector('.update-btn');
+const todoTitle = document.querySelector('#todo-title-input');
+const todoText = document.querySelector('#todo-text-input');
+const todoDate = document.querySelector('#todo-date-input');
+const todoList = document.querySelector('.all-posts-list');
 // Initialize Supabase client
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-const uniqueId = uuidv4();
-// Example function to fetch data from a table
 async function fetchData() {
-    const { data, error } = await supabase
-        .from('newtable') // Replace with your actual table name
-        .select('*');
-    if (error) {
-        console.error('Error fetching data:', error);
-    }
-    else {
-        console.log('Data:', data);
-        const appDiv = document.getElementById('app');
-        appDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+        const { data, error } = await supabase
+            .from('todos')
+            .select('*')
+            .eq('user_id', user.id);
+        if (error) {
+            console.error('Error fetching data:', error);
+        }
+        else {
+            console.log('Data:', data);
+            data?.map((item) => {
+                const li = document.createElement('li');
+                li.id = item.id;
+                li.innerHTML = `
+      <h2 class="post-title">${item.title}</h2>
+      <h2 class="post-text">${item.description22222}</h2>
+      <h2 class="post-date">${item.due_date.toString()}</h2>
+      <button class="del-todo-btn" onclick="deleteTodo(this)">Delete</button>
+      `;
+                todoList.appendChild(li);
+            });
+        }
     }
 }
 async function signUpNewUser() {
@@ -69,17 +84,45 @@ async function signOutUser() {
         appDiv.innerHTML = `<pre>${'User logged out'}</pre>`;
     }
 }
-async function sendData() {
-    const testObj = {
-        id: uniqueId,
-        title: 'firstPost',
-        content: 'firstText',
-        completed: false
-    };
-    const { error } = await supabase
-        .from('newtable')
-        .insert(testObj);
+async function addTodo(newTodo) {
+    if (!user) {
+        console.log("Användare ej inloggad.");
+        return;
+    }
+    const { data, error } = await supabase
+        .from('todos')
+        .insert({
+        user_id: user.id,
+        ...newTodo
+    });
+    if (error) {
+        console.error("Fel vid skapande av todo:", error);
+    }
+    else {
+        console.log("Todo skapad:", data);
+    }
 }
+async function updateData() {
+    const { data: { user } } = await supabase.auth.getUser();
+}
+const deleteTodo = async (e) => {
+    if (!user) {
+        console.log('Inget användare är inloggad.');
+        return;
+    }
+    // Ta bort todo-uppgiften från tabellen
+    const { data, error } = await supabase
+        .from('todos')
+        .delete()
+        .eq('id', e.parentElement.id) // Filtrera på det specifika todo-id:t
+        .eq('user_id', user.id); // Säkerställ att det är den inloggade användarens todo
+    if (error) {
+        console.error('Fel vid borttagning av todo:', error);
+    }
+    else {
+        console.log('Todo borttagen:', data);
+    }
+};
 const { data: { user } } = await supabase.auth.getUser();
 if (user) {
     const appDiv = document.getElementById('app');
@@ -131,8 +174,14 @@ logoutBtn.addEventListener('click', () => {
     }
 });
 sendBtn.addEventListener('click', () => {
-    sendData();
+    const newTodo = {
+        title: todoTitle.value,
+        description: todoText.value,
+        due_date: todoDate.value
+    };
+    addTodo(newTodo);
 });
-// Call the function
-//fetchData();
-//signUpNewUser();
+updateBtn.addEventListener('click', () => {
+    updateData();
+});
+fetchData();

@@ -8,7 +8,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "todo list with supabase connection",
   "devDependencies": {
     "@types/node": "^22.10.7",
     "ts-node": "^10.9.2",
