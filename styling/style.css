@@ -132,18 +132,28 @@ input:focus{
 
 .todo-list-item{
     display: flex;
+    flex-direction: row;
     justify-content: space-around;
     align-items: center;
-    font-size: 1vh;
     background-color: white;
-    height: 80px;
     width: 90%;
-    gap: 5%;
+    gap: 10%; 
+    flex-shrink: 0;
+    height: 100px;
+    font-size: 0.50rem;
 }
 
+.todo-list-item h2{
+    width: 10%;
+}
+
+
+
 .todo-list-item button{
+
     border: none;
     background-color: white;
+ 
 }
 
 .logout-btn{
@@ -204,6 +214,13 @@ input:focus{
     border: 1px solid #888;
     width: 80%;
   }
+
+  .modal-content input{
+    width: 200px;
+height: 40px;
+font-family: "Roboto Mono", serif;
+border: solid 1px gray ;
+  }
   
   .close {
     color: #aaa;
@@ -220,6 +237,37 @@ input:focus{
   }
 
   @media (min-width: 900px) {
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 3;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0,0,0);
+        background-color: rgba(0,0,0,0.4);
+        padding-top: 60px;
+      }
+
+      .modal-content {
+        display: flex;
+        flex-direction: column;
+        background-color: #fefefe;
+        margin: 5% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        height: 400px;
+      }
+
+      .modal-content input{
+        width: 300px;
+    height: 40px;
+    font-family: "Roboto Mono", serif;
+    border: solid 1px gray ;
+      }
     .add-todo-wrapper{
         display: none;
         flex-direction: row;

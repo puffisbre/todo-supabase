@@ -95,7 +95,7 @@ async function fetchData() {
           }
         }
       })
-    }, 1000);
+    }, 1);
   }
   todoList.style.display = 'flex';
 }
