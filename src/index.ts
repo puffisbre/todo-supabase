@@ -16,22 +16,39 @@ const signupBtn = document.querySelector('.signup-btn') as HTMLButtonElement;
 const signupWrapper = document.querySelector('.signup-wrapper') as HTMLElement;
 const loginWrapper = document.querySelector('.login-wrapper') as HTMLElement;
 const sendBtn = document.querySelector('.send-data') as HTMLButtonElement;
-const updateBtn = document.querySelector('.update-btn') as HTMLButtonElement;
 const todoTitle = document.querySelector('#todo-title-input') as HTMLInputElement;
+const addTodoWrapper = document.querySelector('.add-todo-wrapper') as HTMLElement;
 const todoText = document.querySelector('#todo-text-input') as HTMLInputElement;
 const todoDate = document.querySelector('#todo-date-input') as HTMLInputElement;
-const todoList = document.querySelector('.all-posts-list') as HTMLUListElement
+const todoList = document.querySelector('.all-posts-list') as HTMLUListElement;
+const spinner = document.querySelector('.loader') as HTMLElement;
+const notLoggedInBtn = document.querySelector('.not-logged-btn') as HTMLButtonElement;
+const notSignedBtn = document.querySelector('.not-signed-up') as HTMLButtonElement;
 
 // Initialize Supabase client
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
+const { data: { user } } = await supabase.auth.getUser();
 interface NewTodo {
   title: string; 
   description?: string; 
   completed?: boolean; 
   due_date?: string; 
 }
+signupWrapper.style.display = 'none';
+spinner.style.display = "none";
+let completed: Boolean = false;
 
+if(user){
+  const appDiv = document.getElementById('app');
+    appDiv!.innerHTML = `<pre>${user.email}</pre>`;
+ signupWrapper.style.display = 'none';
+ loginWrapper.style.display = 'none';
+ addTodoWrapper.style.display = 'flex';
+ fetchData();
+}else if(!user){
+  loginWrapper.style.display = 'flex';
+  logoutBtn.style.display = "none";
+}
 
 async function fetchData() {
   const { data: { user  } }= await supabase.auth.getUser();
@@ -39,25 +56,45 @@ async function fetchData() {
   const { data, error } = await supabase
     .from('todos') 
     .select('*')
-    .eq('user_id', user.id);
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
 
   if (error) {
     console.error('Error fetching data:', error);
   } else {
     console.log('Data:', data);
-    data?.map((item) => {
-      const li = document.createElement('li') as HTMLLIElement;
-      li.setAttribute('data-parent-id', item.id);
-      li.innerHTML = `
-      <h2 class="post-title">${item.title}</h2>
-      <h2 class="post-text">${item.description22222}</h2>
-      <h2 class="post-date">${item.due_date.toString()}</h2>
-      <button class="del-todo-btn" data-parent-id="${item.id}">Delete</button>
-      `
-      todoList.appendChild(li);
-    })
+    todoList.innerHTML = '';
+    spinner.style.display = "flex";
+    setTimeout(() => {
+      spinner.style.display = "none";
+      data?.map((item) => {
+        const li = document.createElement('li') as HTMLLIElement;
+        li.setAttribute('data-parent-id', item.id);
+        li.classList.add('todo-list-item');
+        li.innerHTML = `
+        <h2 class="post-title">${item.title}</h2>
+        <h2 class="post-text">${item.description}</h2>
+        <h2 class="post-date">${item.due_date.toString().slice(0,10)}</h2>
+        <button class="complete-todo-btn" data-parent-id="${item.id}"><img class="complete-todo-btn" data-parent-id="${item.id}" src=".././images/icons/check.png" width="25px"></img></button>
+        <button class="open-todo-btn" data-parent-id="${item.id}"><img class="open-todo-btn" data-parent-id="${item.id}" src=".././images/icons/pencil.png" width="20px"></button>
+        <button class="del-todo-btn" data-parent-id="${item.id}"><img class="del-todo-btn" data-parent-id="${item.id}" src=".././images/icons/bin.png" width="20px"></button>
+        `
+        todoList.appendChild(li);
+        completed = item.completed;
+        const testLiItem = document.querySelectorAll('.todo-list-item') as NodeListOf<Element>;
+        for(let i = 0; i < testLiItem.length; i++){
+          if(testLiItem[i].getAttribute('data-parent-id') === item.id){
+            if(item.completed === true){
+              testLiItem[i].classList.add('completed-task');
+             }else if(item.completed === false){
+              testLiItem[i].classList.remove('completed-task');
+             }
+          }
+        }
+      })
+    }, 1000);
   }
-  
+  todoList.style.display = 'flex';
 }
 }
 
@@ -69,10 +106,17 @@ async function signUpNewUser(){
 
   if (error) {
     console.error('Error fetching data:', error);
+    alert('WRONG TYPE OF EMAIL OR PASSWORD');
+    loginEmailInput.value = '';
+    loginPasswordInput.value = '';
+    logoutBtn.style.display = 'none';
+    loginWrapper.style.display = 'flex';
+    signupWrapper.style.display = 'none';
+    addTodoWrapper.style.display = 'none';
+    todoList.style.display = 'none';
   } else {
-    console.log('Data:', data);
-    const appDiv = document.getElementById('app');
-    appDiv!.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+  
+   fetchData();
   }
 }
 
@@ -84,10 +128,16 @@ async function signInWithEmail() {
 
   if (error) {
     console.error('Error fetching data:', error);
+    alert('WRONG EMAIL OR PASSWORD');
+    loginEmailInput.value = '';
+    loginPasswordInput.value = '';
+    logoutBtn.style.display = 'none';
+    loginWrapper.style.display = 'flex';
+    signupWrapper.style.display = 'none';
+    addTodoWrapper.style.display = 'none';
+    todoList.style.display = 'none';
   } else {
-    console.log('Data:', data);
-    const appDiv = document.getElementById('app');
-    appDiv!.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+  fetchData();
   }
 }
 
@@ -115,24 +165,87 @@ async function addTodo(newTodo: NewTodo) {
     .insert({
      user_id: user.id,
      ...newTodo
+     
 });
 
   if (error) {
     console.error("Fel vid skapande av todo:", error);
   } else {
-    console.log("Todo skapad:", data);
+    fetchData();
   }
 }
 
-async function updateData() {
-  const { data: { user } } = await supabase.auth.getUser();
-  
- 
+todoList.addEventListener('click', async function(event: MouseEvent) {
+  console.log('Klickad knapp:', event.target); 
+  if (event.target && (event.target as HTMLImageElement).classList.contains('open-todo-btn')) {
+    await openModal(event);
+  }
+});
+
+async function openModal(event: MouseEvent) {
+  if (!user) {
+    return;
+  }
+  const parentId = (event.target as HTMLImageElement).getAttribute('data-parent-id');
+  if (!parentId) return;
+
+  const { data, error } = await supabase
+    .from('todos')
+    .select('*')
+    .eq('id', parentId)
+    .eq('user_id', user.id)
+    .single();
+
+  if (error) {
+    console.error('Error fetching todo:', error);
+    return;
+  }
+
+  (document.getElementById('title') as HTMLInputElement).value = data.title;
+  (document.getElementById('description') as HTMLInputElement).value = data.description;
+  (document.getElementById('date') as HTMLInputElement).value = data.due_date.toString().slice(0,10);
+
+  (document.querySelector('.modal') as HTMLElement).style.display = 'block';
+  document.getElementById('editForm')!.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    await updateTodo(parentId);
+    fetchData();
+  });
 }
 
+async function updateTodo(parentId: string) {
+  const title = (document.getElementById('title') as HTMLInputElement).value;
+  const description = (document.getElementById('description') as HTMLInputElement).value;
+  const due_date = (document.getElementById('date') as HTMLInputElement).value;
+  
+  const { data, error } = await supabase
+    .from('todos')
+    .update({ title, description, due_date })
+    .eq('id', parentId);
+
+  if (error) {
+    console.error('Error updating todo:', error);
+    return;
+  }
+  document.getElementById('editModal')!.style.display = 'none';
+}
+
+document.querySelector('.close')!.addEventListener('click', function() {
+  document.getElementById('editModal')!.style.display = 'none';
+});
+
+let theTodoList = document.querySelector('.all-posts-list') as HTMLUListElement;
+theTodoList.innerHTML = '';
+theTodoList?.addEventListener('click', async function(event: MouseEvent) {
+  if (event.target && (event.target as HTMLButtonElement).classList.contains('open-todo-btn')) {
+    await openModal(event);
+  }
+});
+
+
 todoList.addEventListener('click', async function(event: MouseEvent) {
-  // Kontrollera att event.target är en knapp (HTMLButtonElement)
-  if (event.target && (event.target as HTMLButtonElement).classList.contains('del-todo-btn')) {
+  if (event.target && (event.target as HTMLImageElement).classList.contains('del-todo-btn')) {
     await deleteTodoByParentId(event);
   }
 });
@@ -144,41 +257,97 @@ async function deleteTodoByParentId(event: Event) {
     return;
   }
 
-  // Hämta parentId från data-parent-id attributet på knappen
-  const button = event.target as HTMLButtonElement; // Typa om till HTMLButtonElement
-  const parentId = button.getAttribute('data-parent-id'); // Hämta parentId
+
+  const button = event.target as HTMLImageElement;
+  const parentId = button.getAttribute('data-parent-id'); 
  console.log(parentId)
   if (!parentId) {
     console.log('Parent ID saknas.');
     return;
   }
 
-  // Ta bort todo-uppgiften från tabellen baserat på parentId
+ 
   const { data, error } = await supabase
     .from('todos')
     .delete()
-    .eq('id', parentId) // Filtrera på parent_id
-    .eq('user_id', user.id); // Säkerställ att det är den inloggade användarens todo
+    .eq('id', parentId)
+    .eq('user_id', user.id); 
 
   if (error) {
     console.error('Fel vid borttagning av todo:', error);
   } else {
-    console.log('Todo borttagen:', data);
+    fetchData();
   }
 }
 
+todoList.addEventListener('click', async function(event: MouseEvent) {
+  if (event.target && (event.target as HTMLImageElement).classList.contains('complete-todo-btn')) {
+    await completeTask(event);
+  }
+});
 
-const { data: { user } } = await supabase.auth.getUser();
+async function completeTask(event: Event) {
+  console.log("Hello")
+  if (!user) {
+    console.log('Inget användare är inloggad.');
+    return;
+  }
 
 if(user){
-  const appDiv = document.getElementById('app');
-    appDiv!.innerHTML = `<pre>${user.email}</pre>`;
- signupWrapper.style.display = 'none';
- loginWrapper.style.display = 'none';
-}else if(!user){
-  signupWrapper.style.display = 'flex';
-  loginWrapper.style.display = 'flex';
+  const button = event.target as HTMLImageElement;
+  const parentId = button.getAttribute('data-parent-id'); 
+ console.log(parentId)
+  if (!parentId) {
+    console.log('Parent ID saknas.');
+    return;
+  }
+
+
+
+  const { data, error } = await supabase
+    .from('todos')
+    .select('completed')
+    .eq('id', parentId)
+    .eq('user_id', user.id); 
+
+  if (error) {
+    console.error('Fel vid borttagning av todo:', error);
+  } else {
+
+    if (data && data.length > 0) {
+      const item = data[0];
+  
+      const { error: updateError } = await supabase
+        .from('todos')
+        .update({ completed: !item.completed }) 
+        .eq('id', parentId);  
+  
+      if (updateError) {
+        console.error('Fel vid uppdatering av data:', updateError);
+      } else {
+        const testLiItem = document.querySelectorAll('.todo-list-item') as NodeListOf<Element>;
+
+        for(let i = 0; i < testLiItem.length; i++){
+          if(testLiItem[i].getAttribute('data-parent-id') === parentId){
+            if(item.completed === true){
+              testLiItem[i].classList.remove('completed-task');
+             }else if(item.completed === false){
+              testLiItem[i].classList.add('completed-task');
+             }
+          }
+        }
+      }
+    }
+     
+    }
+  }
 }
+
+async function fetchCompleted(){
+
+}
+
+
 
 signupBtn.addEventListener('click', () => {
   signUpNewUser();
@@ -186,39 +355,32 @@ signupBtn.addEventListener('click', () => {
  loginPasswordInput.value = '';
  signupEmailInput.value = '';
  signupPasswordInput.value = '';
- if(user){
-  signupWrapper.style.display = 'none';
-  loginWrapper.style.display = 'none';
- }else if(!user){
-   signupWrapper.style.display = 'none';
-   loginWrapper.style.display = 'none';
- }
+ logoutBtn.style.display = 'inline-block';
+ loginWrapper.style.display = 'none';
+ signupWrapper.style.display = 'none';
+ addTodoWrapper.style.display = 'flex';
 })
 
 loginBtn.addEventListener('click', () => {
  signInWithEmail();
  loginEmailInput.value = '';
  loginPasswordInput.value = '';
- if(user){
-  signupWrapper.style.display = 'none';
-  loginWrapper.style.display = 'none';
- 
- }else if(!user){
-   signupWrapper.style.display = 'flex';
-   loginWrapper.style.display = 'flex';
- }
+ logoutBtn.style.display = 'inline-block';
+ loginWrapper.style.display = 'none';
+ signupWrapper.style.display = 'none';
+ addTodoWrapper.style.display = 'flex';
 })
 
 
 logoutBtn.addEventListener('click', () => {
  signOutUser();
- if(user){
-  signupWrapper.style.display = 'none';
-  loginWrapper.style.display = 'none';
- }else if(!user){
-  signupWrapper.style.display = 'flex';
-   loginWrapper.style.display = 'flex';
- }
+ loginEmailInput.value = '';
+ loginPasswordInput.value = '';
+ logoutBtn.style.display = 'none';
+ loginWrapper.style.display = 'flex';
+ signupWrapper.style.display = 'none';
+ addTodoWrapper.style.display = 'none';
+ todoList.style.display = 'none';
 })
 
 
@@ -230,13 +392,22 @@ sendBtn.addEventListener('click', () => {
     due_date: todoDate.value
   };
 addTodo(newTodo);
+todoTitle.value = '';
+todoText.value = '';
+todoDate.value = '';
 })
 
-updateBtn.addEventListener('click', () => {
-  updateData();
+notLoggedInBtn.addEventListener('click', () => {
+  loginWrapper.style.display = 'flex';
+  signupWrapper.style.display = 'none';
 })
 
-fetchData();
+notSignedBtn.addEventListener('click', () => {
+  signupWrapper.style.display = 'flex';
+  loginWrapper.style.display = 'none';
+})
+
+
 
 
 

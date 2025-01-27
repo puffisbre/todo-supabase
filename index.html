@@ -3,38 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styling/style.css">
     <title>Document</title>
 </head>
 <body>
+    <h1 class="todo-title">Todo List</h1>
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+          <span class="close">&times;</span>
+          <h2>Redigera post</h2>
+          <form id="editForm">
+            <input type="text" id="title" placeholder="Title" required />
+            <input type="text" id="description" placeholder="Text" required />
+            <input type="text" id="date" placeholder="Date" required />
+            <button type="submit">Save</button>
+          </form>
+        </div>
+      </div>
+    <button class="logout-btn">Logout</button>
     <div id="app"></div>
-    <script type="module" src="/src/index.ts"></script>
     <div class="signup-wrapper">
-        <label for="signup-email-field">Email</label>
-        <input type="text" id="signup-email-field" name="signup-email-field">
-        <label for="signup-password-field">Password</label>
-        <input type="signup-password-field" name="signup-password-field" id="signup-password-field">
-        <button class="signup-btn">Signup</button>
+        <h3>Sign up</h3>
+        <input type="text" id="signup-email-field" name="signup-email-field" placeholder="Email">
+        <input type="password" name="signup-password-field" id="signup-password-field" placeholder="Password">
+        <div class="mini-button-wrapper">
+            <button class="signup-btn">Sign Up</button>
+            <button class="not-logged-btn">Go back</button>
+            </div>
     </div>
     <div class="login-wrapper">
-        <label for="login-email-field">Email</label>
-        <input type="text" id="login-email-field" name="login-email-field">
-        <label for="login-password-field">Password</label>
-        <input type="login-password-field" name="login-password-field" id="login-password-field">
+        <h3>Log in</h3>
+        <input type="text" id="login-email-field" name="login-email-field" placeholder="Email">
+        <input type="password" name="login-password-field" id="login-password-field" placeholder="Password">
+        <div class="mini-button-wrapper">
         <button class="login-btn">Login</button>
+        <button class="not-signed-up">Sign Up</button>
+        </div>
     </div>
-
+    
     <div class="add-todo-wrapper">
-        <label for="todo-text-title">Titel på todo:</label>
-        <input type="text" name="todo-title-input" id="todo-title-input">
-        <label for="todo-text-input">Text på todo:</label>
-        <input type="text" name="todo-text-input" id="todo-text-input">
-        <label for="todo-date-input">Ska vara klar till:</label>
-        <input type="text" name="todo-date-input" id="todo-date-input">
+        
+        <input type="text" name="todo-title-input" id="todo-title-input" placeholder="Titel">
+        <input type="text" name="todo-text-input" id="todo-text-input" placeholder="Text">
+        <input type="text" name="todo-date-input" id="todo-date-input" placeholder="Date Format 'YYYY-MM-DD'">
+        <button class="send-data">Add todo</button>
     </div>
-
+    <div class="loader"></div>
     <ul class="all-posts-list"></ul>
-     <button class="send-data">Send Data</button>
-    <button class="logout-btn">Logout</button>
-    <button class="update-btn">Update Data</button>
+     
+    
+    <script type="module" src="/src/index.ts"></script>
 </body>
 </html>

@@ -1,0 +1,272 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #34495e;
+    font-family: "Roboto Mono", serif;
+    font-optical-sizing: auto;
+    font-weight: regular;
+    font-style: normal;
+}
+
+input{
+    border: none;
+}
+
+input:focus{
+    outline: none;
+}
+
+
+
+.signup-wrapper{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 2%;
+    gap: 10px;
+    color: black;
+    background-color: white;
+    height: 300px;
+    width: 90%;
+}
+
+
+.login-wrapper{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 2%;
+    gap: 10px;
+    color: black;
+    background-color: white;
+    height: 300px;
+    width: 90%;
+}
+
+
+#signup-email-field, #signup-password-field{
+    width: 300px;
+    height: 40px;
+    font-family: "Roboto Mono", serif;
+    border: solid 1px gray ;
+}
+
+#login-email-field, #login-password-field{
+    width: 300px;
+    height: 40px;
+    font-family: "Roboto Mono", serif;
+    border: solid 1px gray ;
+}
+
+
+.todo-title{
+    color: white;
+    margin-top: 50px;
+}
+
+
+.mini-button-wrapper{
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.signup-btn,.not-logged-btn,.login-btn,.not-signed-up{
+    width: 300px;
+    height: 50px;
+    border: none;
+    color: white;
+    font-size: 2vh;
+    background-color: #3498db;
+    font-family: "Roboto Mono", serif;
+}
+
+.add-todo-wrapper{
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 5%;
+    width: 90%;
+}
+
+.add-todo-wrapper input{
+    height: 70px;
+    width: 100%;
+    font-family: "Roboto Mono", serif;
+    font-size: 2vh;
+}
+
+.add-todo-wrapper button{
+    height: 70px;
+    width: 100%;
+    border: none;
+    color: white;
+    font-size: 2vh;
+    background-color: #3498db;
+    font-family: "Roboto Mono", serif;
+}
+
+.all-posts-list{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    list-style: none;
+    margin-top: 20px;
+    width: 100%;
+    gap: 10px;
+}
+
+.todo-list-item{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    font-size: 1vh;
+    background-color: white;
+    height: 80px;
+    width: 90%;
+    gap: 5%;
+}
+
+.todo-list-item button{
+    border: none;
+    background-color: white;
+}
+
+.logout-btn{
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 30px;
+    width: 80px;
+    font-family: "Roboto Mono", serif;
+    background-color: #DC4C64;
+    border: none;
+}
+
+.loader {
+    width: 50px;
+    padding: 8px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: #25b09b;
+    --_m: 
+      conic-gradient(#0000 10%,#000),
+      linear-gradient(#000 0 0) content-box;
+    -webkit-mask: var(--_m);
+            mask: var(--_m);
+    -webkit-mask-composite: source-out;
+            mask-composite: subtract;
+    animation: l3 1s infinite linear;
+  }
+  @keyframes l3 {to{transform: rotate(1turn)}}
+
+  .completed-task{
+    background-color: gray;
+    text-decoration: line-through;
+  }
+
+  .completed-task button{
+    background-color: gray;
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 3;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.4);
+    padding-top: 60px;
+  }
+  
+  .modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+  }
+  
+  .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+  
+  .close:hover,
+  .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  @media (min-width: 900px) {
+    .add-todo-wrapper{
+        display: none;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        margin-top: 5%;
+        width: 90%;
+    }
+    .add-todo-wrapper input{
+        height: 70px;
+        width: 90%;
+        font-family: "Roboto Mono", serif;
+        font-size: 2vh;
+    }
+
+    .add-todo-wrapper button{
+        height: 70px;
+        width: 40%;
+        border: none;
+        color: white;
+        font-size: 2vh;
+        background-color: #3498db;
+        font-family: "Roboto Mono", serif;
+    }
+
+    .login-wrapper{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        color: black;
+        background-color: white;
+        height: 600px;
+        width: 40%;
+    }
+
+    .signup-wrapper{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        color: black;
+        background-color: white;
+        height: 600px;
+        width: 40%;
+    }
+    
+  }
