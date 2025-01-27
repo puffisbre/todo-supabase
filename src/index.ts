@@ -1,5 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
+import pencilImage from '../images/pencil.png';
+import checkImage from '../images/check.png';
+import binImage from '../images/bin.png';
 
 
 // Get Supabase URL and Key from environment variables
@@ -75,9 +78,9 @@ async function fetchData() {
         <h2 class="post-title">${item.title}</h2>
         <h2 class="post-text">${item.description}</h2>
         <h2 class="post-date">${item.due_date.toString().slice(0,10)}</h2>
-        <button class="complete-todo-btn" data-parent-id="${item.id}"><img class="complete-todo-btn" data-parent-id="${item.id}" src="../images/check.png" width="25px"></img></button>
-        <button class="open-todo-btn" data-parent-id="${item.id}"><img class="open-todo-btn" data-parent-id="${item.id}" src="../images/pencil.png" width="20px"></button>
-        <button class="del-todo-btn" data-parent-id="${item.id}"><img class="del-todo-btn" data-parent-id="${item.id}" src="../images/bin.png" width="20px"></button>
+        <button class="complete-todo-btn" data-parent-id="${item.id}"><img class="complete-todo-btn" data-parent-id="${item.id}" src=${checkImage} width="25px"></img></button>
+        <button class="open-todo-btn" data-parent-id="${item.id}"><img class="open-todo-btn" data-parent-id="${item.id}" src=${pencilImage} width="20px"></button>
+        <button class="del-todo-btn" data-parent-id="${item.id}"><img class="del-todo-btn" data-parent-id="${item.id}" src=${binImage} width="20px"></button>
         `
         todoList.appendChild(li);
         completed = item.completed;
